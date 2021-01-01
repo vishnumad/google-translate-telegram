@@ -27,8 +27,6 @@ func main() {
 		log.Panic("AUTHED_CHAT must be a 64-bit integer")
 	}
 
-	log.Printf("La Tranductora 👩‍🏫")
-
 	// Setup Telegram Bot
 	bot, error := tg.NewBotAPI(telegramToken)
 	if error != nil {
@@ -99,8 +97,6 @@ func main() {
 					}
 				}
 			}
-		case "whatlang", "lang":
-			// TODO: Handle language
 		case "start":
 			reply := tg.NewMessage(message.Chat.ID, "¡Soy la tranductora! 👩‍🏫")
 			bot.Send(reply)
@@ -108,7 +104,7 @@ func main() {
 			reply := tg.NewMessage(message.Chat.ID, "Estoy corriendo. 🏃‍♀")
 			bot.Send(reply)
 		default:
-			log.Printf("Unknown Command: %s %s\n", command, message.CommandArguments())
+			// Ignore unknown commands
 		}
 	}
 }
