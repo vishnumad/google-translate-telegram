@@ -154,5 +154,5 @@ func parseLangCode(rawText string) (string, string) {
 		return "", rawText
 	}
 
-	return rawText[len(prefix):firstSpaceIndex], rawText[firstSpaceIndex:len(rawText)]
+	return rawText[len(prefix):firstSpaceIndex], rawText[firstSpaceIndex:]
 }
