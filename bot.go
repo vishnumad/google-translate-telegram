@@ -33,7 +33,8 @@ func main() {
 		log.Panic(error)
 	}
 
-	log.Printf("Using Account: %s", bot.Self.UserName)
+	botUsername := bot.Self.UserName
+	log.Printf("Using Account: %s", botUsername)
 
 	updateConfig := tg.NewUpdate(0)
 	updateConfig.Timeout = 60
@@ -72,12 +73,14 @@ func main() {
 			continue
 		}
 
-		switch command := message.Command(); command {
-		case "translate", "tl":
+		command, taggedUsername := commandAndUsername(message)
+
+		switch {
+		case command == "translate" || command == "tl":
 			if quotedMessage := message.ReplyToMessage; quotedMessage != nil {
 				// Translate the quoted message
 				targetLang := message.CommandArguments()
-				response, error := translate(ctx, client, targetLang, quotedMessage.Text)
+				response, error := translate(client, ctx, targetLang, quotedMessage.Text)
 				if error != nil {
 					log.Printf("Error Translating: %s\n", error.Error())
 				} else {
@@ -88,7 +91,7 @@ func main() {
 				// Translate the command argument
 				code, text := parseLangCode(message.CommandArguments())
 				if len(text) > 2 {
-					response, error := translate(ctx, client, code, text)
+					response, error := translate(client, ctx, code, text)
 					if error != nil {
 						log.Printf("Error Translating: %s\n", error.Error())
 					} else {
@@ -97,10 +100,10 @@ func main() {
 					}
 				}
 			}
-		case "start":
+		case command == "start" && taggedUsername == botUsername:
 			reply := tg.NewMessage(message.Chat.ID, "¡Soy la tranductora! 👩‍🏫")
 			bot.Send(reply)
-		case "ping":
+		case command == "ping" && taggedUsername == botUsername:
 			reply := tg.NewMessage(message.Chat.ID, "Estoy corriendo. 🏃‍♀")
 			bot.Send(reply)
 		default:
@@ -110,8 +113,8 @@ func main() {
 }
 
 func translate(
-	ctx context.Context,
 	client *tl.Client,
+	ctx context.Context,
 	targetLang string,
 	message string,
 ) (string, error) {
@@ -155,4 +158,15 @@ func parseLangCode(rawText string) (string, string) {
 	}
 
 	return rawText[len(prefix):firstSpaceIndex], rawText[firstSpaceIndex:]
+}
+
+func commandAndUsername(message *tg.Message) (string, string) {
+	command := message.CommandWithAt()
+	splitCommand := strings.Split(command, "@")
+
+	if len(splitCommand) > 1 {
+		return splitCommand[0], splitCommand[1]
+	} else {
+		return command, ""
+	}
 }
