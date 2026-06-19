@@ -15,10 +15,7 @@ import (
 )
 
 func main() {
-	error := godotenv.Load()
-	if error != nil {
-		log.Panic("Error loading .env file")
-	}
+	godotenv.Load()
 
 	telegramToken := os.Getenv("TELEGRAM_TOKEN")
 	translateAPIKey := os.Getenv("TRANSLATE_API_KEY")
